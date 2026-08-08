@@ -11,11 +11,13 @@ import { UserListTable } from '@/components/users/UserListTable'
 import { ResetPinDialog } from '@/components/users/ResetPinDialog'
 import { useUserContext } from '@/context/UserContext'
 import { Input } from '@/components/ui/input'
+import { useTranslation } from 'react-i18next'
 
 const BLUE_MAIN = '#0A2A5E'
 
 function UtilisateursSettingsContent() {
   const router = useRouter()
+  const { t } = useTranslation()
   const { currentUser } = useUserContext()
   const [, forceUpdate] = useState({})
 
@@ -97,14 +99,14 @@ function UtilisateursSettingsContent() {
           className="gap-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/20"
         >
           <ArrowLeft className="h-4 w-4" />
-          Retour
+          {t('common.back', 'Retour')}
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Gestion des caissiers
+            {t('settings.users.title', 'Gestion des caissiers')}
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">
-            Gérez les caissiers et suivez leur présence en temps réel
+            {t('settings.users.subtitle', 'Gérez les caissiers et leurs accès')}
           </p>
         </div>
         <Button
@@ -112,7 +114,7 @@ function UtilisateursSettingsContent() {
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-colors duration-150 shadow-sm shadow-blue-600/10 cursor-pointer"
         >
           <Plus size={15} />
-          Ajouter un caissier
+          {t('settings.users.add_cashier', 'Ajouter un caissier')}
         </Button>
       </div>
 

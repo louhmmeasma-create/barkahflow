@@ -41,7 +41,8 @@ import {
   getPresenceColor,
   getLastConnectionText,
 } from '@/lib/user-data'
-import { getCashierStatsRealTime, type CashierStatsToday } from '@/lib/invoice-data'
+import { getCashierStatsRealTime, type CashierStatsToday, getInvoicesByUser, type Invoice } from '@/lib/invoice-data'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 interface UserListTableProps {
@@ -63,6 +64,7 @@ export function UserListTable({
   onResetPin,
   onRefresh,
 }: UserListTableProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [deleteTarget, setDeleteTarget] = useState<AppUserRow | null>(null)
   const [userStats, setUserStats] = useState<Record<string, CashierStatsToday>>({})
@@ -178,6 +180,31 @@ export function UserListTable({
     }
   }
 
+  const formatLastLogin = (date: string | null) => {
+    if (!date) return 'Jamais'
+    try {
+      const now = new Date()
+      const last = new Date(date)
+      const diff = now.getTime() - last.getTime()
+      
+      if (diff < 60000) {
+        return t('cashiers_page.just_now', 'À l\'instant')
+      } else if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000)
+        return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`
+      } else if (diff < 86400000) {
+        return `Aujourd'hui ${last.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+      } else if (diff < 172800000) {
+        return 'Hier'
+      } else {
+        const days = Math.floor(diff / 86400000)
+        return `Il y a ${days} jour${days > 1 ? 's' : ''}`
+      }
+    } catch {
+      return 'Date invalide'
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -206,7 +233,7 @@ export function UserListTable({
             Aucun caissier
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            Créez votre premier caissier avec le bouton ci-dessus
+            {t('cashiers_page.create_first_cashier', 'Créez votre premier caissier avec le bouton ci-dessus')}
           </p>
         </div>
       )}

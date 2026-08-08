@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -38,6 +40,8 @@ import {
   setBiometricEnabled,
   getInactivityTimeoutSeconds,
   setInactivityTimeoutSeconds,
+  setPinCode,
+  disablePin,
 } from '@/lib/pin-storage'
 import {
   isBiometricAvailable,
@@ -45,10 +49,12 @@ import {
   clearBiometricRegistration,
 } from '@/lib/biometric-auth'
 import { useUserContext } from '@/context/UserContext'
+import { useTranslation } from 'react-i18next'
 
 const PRIMARY = '#2C3E50'
 
 export default function SecuritySettingsPage() {
+  const { t } = useTranslation()
   const router = useRouter()
   const { currentUser } = useUserContext()
   const [loading, setLoading] = useState(true)
@@ -61,6 +67,10 @@ export default function SecuritySettingsPage() {
   const [inactivityTimeout, setInactivityTimeoutState] = useState(30)
 
   const [disablePinDialogOpen, setDisablePinDialogOpen] = useState(false)
+  const [pinDialogOpen, setPinDialogOpen] = useState(false)
+  const [newPin, setNewPin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
+  const [savingPin, setSavingPin] = useState(false)
 
   const isAdmin = currentUser?.role === 'admin'
   const isCashier = currentUser?.role === 'cashier'
@@ -85,6 +95,35 @@ export default function SecuritySettingsPage() {
   }
 
   // ─── Toggle ON/OFF — ne crée / ne modifie JAMAIS le code PIN lui-même ───
+
+  const handleOpenSetPin = () => {
+    setNewPin('')
+    setConfirmPin('')
+    setPinDialogOpen(true)
+  }
+
+  const handleSavePin = async () => {
+    if (!/^\d{4,6}$/.test(newPin)) {
+      toast.error(t('settings_security.enter_valid_pin', 'Le PIN doit contenir entre 4 et 6 chiffres'))
+      return
+    }
+    if (newPin !== confirmPin) {
+      toast.error(t('settings_security.pins_dont_match', 'Les deux codes PIN ne correspondent pas'))
+      return
+    }
+    setSavingPin(true)
+    try {
+      await setPinCode(newPin)
+      setPinEnabledState(true)
+      setPinDialogOpen(false)
+      toast.success(t('settings_security.pin_activated', 'Code PIN activé'))
+    } catch (error: any) {
+      toast.error(error?.message || t('settings_security.error_create_pin', 'Erreur lors de la création du PIN'))
+    } finally {
+      setSavingPin(false)
+    }
+  }
+
   const handleTogglePin = (checked: boolean) => {
     if (checked) {
       if (isAdmin) {
@@ -103,7 +142,10 @@ export default function SecuritySettingsPage() {
         // Le caissier a déjà un PIN dans son profil (base de données) ;
         // on active juste le verrouillage local.
         setPinEnabledState(true)
-        toast.success('Verrouillage activé')
+        // On doit enregistrer le PIN existant du caissier
+        // On récupère le PIN du caissier depuis le currentUser
+        // Pour l'instant on active juste le verrouillage
+        toast.success(t('settings_security.lock_enabled', 'Verrouillage activé'))
       }
     } else {
       setDisablePinDialogOpen(true)
@@ -111,6 +153,7 @@ export default function SecuritySettingsPage() {
   }
 
   const handleDisablePin = () => {
+    disablePin()
     if (isAdmin) {
       try {
         setPinLockEnabled(false)
@@ -124,12 +167,12 @@ export default function SecuritySettingsPage() {
     clearBiometricRegistration()
     setBiometricEnabled(false)
     setDisablePinDialogOpen(false)
-    toast.success('Verrouillage désactivé')
+    toast.success(t('settings_security.pin_lock_disabled', 'Verrouillage par PIN désactivé'))
   }
 
   const handleToggleBiometric = async (checked: boolean) => {
     if (!pinEnabled) {
-      toast.error('Active d\'abord le verrouillage par PIN')
+      toast.error(t('settings_security.biometric_active_lock_first', 'Activez d\'abord le verrouillage'))
       return
     }
     if (checked) {
@@ -137,15 +180,15 @@ export default function SecuritySettingsPage() {
       if (success) {
         setBiometricEnabled(true)
         setBiometricEnabledState(true)
-        toast.success('Biométrie activée')
+        toast.success(t('settings_security.biometric_activated_toast', 'Biométrie activée'))
       } else {
-        toast.error('Impossible d\'activer la biométrie sur cet appareil')
+        toast.error(t('settings_security.biometric_failed_toast', 'Impossible d\'activer la biométrie sur cet appareil'))
       }
     } else {
       clearBiometricRegistration()
       setBiometricEnabled(false)
       setBiometricEnabledState(false)
-      toast.success('Biométrie désactivée')
+      toast.success(t('settings_security.biometric_deactivated_toast', 'Biométrie désactivée'))
     }
   }
 
@@ -154,9 +197,9 @@ export default function SecuritySettingsPage() {
     try {
       setInactivityTimeoutSeconds(seconds)
       setInactivityTimeoutState(seconds)
-      toast.success('Durée d\'inactivité mise à jour')
+      toast.success(t('settings_security.inactivity_timeout_updated_toast', 'Durée d\'inactivité mise à jour'))
     } catch (error: any) {
-      toast.error(error?.message || 'Erreur lors de la mise à jour')
+      toast.error(error?.message || t('settings_security.error_update', 'Erreur lors de la mise à jour'))
     }
   }
 
@@ -173,9 +216,9 @@ export default function SecuritySettingsPage() {
     <div className="max-w-2xl mx-auto p-6">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" onClick={() => router.push('/dashboard')} className="gap-2 rounded-xl">
-          <ArrowLeft className="h-4 w-4" /> Retour
+          <ArrowLeft className="h-4 w-4" /> {t('common.back', 'Retour')}
         </Button>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Paramètres</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings_security.title', 'Paramètres')}</h1>
       </div>
 
       {/* ─── SECTION VERROUILLAGE ─────────────────────────────────── */}
@@ -183,12 +226,12 @@ export default function SecuritySettingsPage() {
         <CardHeader>
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <Lock className="h-5 w-5 text-gray-500" />
-            Verrouillage de l'application
+            {t('settings_security.app_lock', 'Verrouillage de l\'application')}
           </CardTitle>
           <CardDescription>
             {isAdmin
-              ? 'Activez ou désactivez le verrouillage. Le code PIN utilisé se gère depuis votre profil.'
-              : 'Activez le verrouillage avec votre code PIN existant.'}
+              ? t('settings_security.admin_lock_desc', 'Activez le verrouillage avec un code PIN personnel.')
+              : t('settings_security.cashier_lock_desc', 'Activez le verrouillage avec votre code PIN existant.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -202,14 +245,14 @@ export default function SecuritySettingsPage() {
               )}
               <div>
                 <p className="font-medium text-sm text-gray-900 dark:text-white">
-                  {pinEnabled ? 'Verrouillage activé' : 'Verrouillage désactivé'}
+                  {pinEnabled ? t('settings_security.lock_enabled', 'Verrouillage activé') : t('settings_security.lock_disabled', 'Verrouillage désactivé')}
                 </p>
                 <p className="text-xs text-gray-500">
                   {pinEnabled
-                    ? 'L\'application se verrouille automatiquement'
-                    : isAdmin && !pinDefined
-                    ? 'Définissez un PIN dans votre profil pour pouvoir activer'
-                    : 'Activez le verrouillage avec votre PIN'}
+                    ? t('settings_security.lock_auto_desc', 'L\'application se verrouille automatiquement')
+                    : isAdmin
+                    ? t('settings_security.admin_set_pin_desc', 'Définissez un PIN pour activer le verrouillage')
+                    : t('settings_security.cashier_set_pin_desc', 'Activez le verrouillage avec votre PIN')}
                 </p>
               </div>
             </div>
@@ -236,7 +279,7 @@ export default function SecuritySettingsPage() {
           {isAdmin && pinDefined && (
             <div className="mt-4 flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                Code PIN configuré
+                {t('settings_security.pin_configured', 'Code PIN configuré')}
               </span>
               <Button
                 variant="outline"
@@ -244,7 +287,7 @@ export default function SecuritySettingsPage() {
                 className="rounded-xl"
                 onClick={() => router.push('/dashboard/profil')}
               >
-                Gérer dans mon profil
+                {t('settings_security.change_pin', 'Changer le PIN')}
               </Button>
             </div>
           )}
@@ -254,9 +297,34 @@ export default function SecuritySettingsPage() {
             <div className="mt-4 flex items-center gap-2 p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">
               <Lock className="h-4 w-4 text-gray-400" />
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                Utilisez votre code PIN personnel pour déverrouiller l'application.
+                {t('settings_security.cashier_use_pin_hint', 'Utilisez votre code PIN personnel pour déverrouiller l\'application.')}
               </span>
             </div>
+          )}
+
+          {/* ─── Admin : bouton pour définir le PIN si désactivé ──── */}
+          {isAdmin && !pinEnabled && (
+            <Button
+              className="mt-4 rounded-xl text-white w-full"
+              style={{ backgroundColor: PRIMARY }}
+              onClick={handleOpenSetPin}
+            >
+              {t('settings_security.define_pin', 'Définir un code PIN')}
+            </Button>
+          )}
+
+          {/* ─── Caissier : bouton pour activer si désactivé ──────── */}
+          {isCashier && !pinEnabled && (
+            <Button
+              className="mt-4 rounded-xl text-white w-full"
+              style={{ backgroundColor: PRIMARY }}
+              onClick={() => {
+                setPinEnabledState(true)
+                toast.success(t('settings_security.lock_enabled', 'Verrouillage activé'))
+              }}
+            >
+              {t('settings_security.activate_lock', 'Activer le verrouillage')}
+            </Button>
           )}
         </CardContent>
       </Card>
@@ -266,10 +334,10 @@ export default function SecuritySettingsPage() {
         <CardHeader>
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <Clock className="h-5 w-5 text-gray-500" />
-            Durée d'inactivité
+            {t('settings_security.inactivity_timeout', 'Durée d\'inactivité')}
           </CardTitle>
           <CardDescription>
-            Délai sans activité avant que l'app se verrouille automatiquement.
+            {t('settings_security.inactivity_timeout_desc', 'Délai sans activité avant que l\'app se verrouille automatiquement.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -279,19 +347,19 @@ export default function SecuritySettingsPage() {
             disabled={!pinEnabled}
           >
             <SelectTrigger className="rounded-xl w-full sm:w-56">
-              <SelectValue placeholder="Choisir une durée" />
+              <SelectValue placeholder={t('settings_security.choose_duration', 'Choisir une durée')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="30">30 secondes</SelectItem>
-              <SelectItem value="60">1 minute</SelectItem>
-              <SelectItem value="120">2 minutes</SelectItem>
-              <SelectItem value="300">5 minutes</SelectItem>
-              <SelectItem value="600">10 minutes</SelectItem>
+              <SelectItem value="30">{t('settings_security.seconds', '30 secondes', { count: 30 })}</SelectItem>
+              <SelectItem value="60">{t('settings_security.minute_one', '1 minute', { count: 1 })}</SelectItem>
+              <SelectItem value="120">{t('settings_security.minutes', '2 minutes', { count: 2 })}</SelectItem>
+              <SelectItem value="300">{t('settings_security.minutes', '5 minutes', { count: 5 })}</SelectItem>
+              <SelectItem value="600">{t('settings_security.minutes', '10 minutes', { count: 10 })}</SelectItem>
             </SelectContent>
           </Select>
           {!pinEnabled && (
             <p className="text-xs text-gray-400 mt-2">
-              Activez d'abord le verrouillage pour configurer ce réglage.
+              {t('settings_security.activate_lock_first', 'Activez d\'abord le verrouillage pour configurer ce réglage.')}
             </p>
           )}
         </CardContent>
@@ -302,22 +370,22 @@ export default function SecuritySettingsPage() {
         <CardHeader>
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <Fingerprint className="h-5 w-5 text-gray-500" />
-            Déverrouillage biométrique
+            {t('settings_security.biometric_unlock', 'Déverrouillage biométrique')}
           </CardTitle>
           <CardDescription>
             {biometricAvailable
-              ? 'Utilise Windows Hello ou la reconnaissance disponible sur cet appareil.'
-              : 'Aucun capteur biométrique détecté sur cet appareil.'}
+              ? t('settings_security.biometric_available', 'Utilise Windows Hello ou la reconnaissance disponible sur cet appareil.')
+              : t('settings_security.biometric_unavailable', 'Aucun capteur biométrique détecté sur cet appareil.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600 dark:text-gray-300">
               {!pinEnabled
-                ? 'Activez d\'abord le verrouillage'
+                ? t('settings_security.biometric_active_lock_first', 'Activez d\'abord le verrouillage')
                 : biometricEnabled
-                ? 'Biométrie activée'
-                : 'Biométrie désactivée'}
+                ? t('settings_security.biometric_active', 'Biométrie activée')
+                : t('settings_security.biometric_inactive', 'Biométrie désactivée')}
             </span>
             <Switch
               checked={biometricEnabled}
@@ -328,22 +396,70 @@ export default function SecuritySettingsPage() {
         </CardContent>
       </Card>
 
+      {/* ─── Dialog pour créer/changer le PIN (Admin uniquement) ──── */}
+      <Dialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>
+        <DialogContent className="rounded-2xl sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{pinEnabled ? t('settings_security.change_pin', 'Changer le code PIN') : t('settings_security.create_pin_title', 'Créer un code PIN')}</DialogTitle>
+            <DialogDescription>{t('settings_security.choose_pin_desc', 'Choisis un code à 4-6 chiffres pour verrouiller l\'application.')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>{t('settings_security.new_pin_label', 'Nouveau code')}</Label>
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                value={newPin}
+                onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
+                className="rounded-xl h-11 text-center tracking-widest text-lg"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t('settings_security.confirm_pin_label', 'Confirmer le code')}</Label>
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                value={confirmPin}
+                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                className="rounded-xl h-11 text-center tracking-widest text-lg"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPinDialogOpen(false)} className="rounded-xl">
+              {t('common.cancel', 'Annuler')}
+            </Button>
+            <Button
+              onClick={handleSavePin}
+              disabled={savingPin}
+              className="rounded-xl text-white"
+              style={{ backgroundColor: PRIMARY }}
+            >
+              {savingPin ? t('settings_security.saving', 'Enregistrement...') : t('common.save', 'Enregistrer')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* ─── Dialog de confirmation pour désactiver ────────────────── */}
       <Dialog open={disablePinDialogOpen} onOpenChange={setDisablePinDialogOpen}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Désactiver le verrouillage ?</DialogTitle>
+            <DialogTitle>{t('settings_security.disable_lock_title', 'Désactiver le verrouillage ?')}</DialogTitle>
             <DialogDescription>
-              L'app ne demandera plus de code PIN au démarrage. La biométrie sera aussi désactivée.
-              {isAdmin && ' Votre code PIN reste enregistré — vous pourrez réactiver le verrouillage sans le redéfinir.'}
+              {isAdmin
+                ? t('settings_security.admin_disable_lock_desc', 'L\'app ne demandera plus de code PIN au démarrage. La biométrie sera aussi désactivée.')
+                : t('settings_security.cashier_disable_lock_desc', 'L\'app ne demandera plus votre code PIN au démarrage.')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDisablePinDialogOpen(false)} className="rounded-xl">
-              Annuler
+              {t('common.cancel', 'Annuler')}
             </Button>
             <Button onClick={handleDisablePin} className="rounded-xl bg-red-500 hover:bg-red-600 text-white">
-              Désactiver
+              {t('settings_security.disable', 'Désactiver')}
             </Button>
           </DialogFooter>
         </DialogContent>
