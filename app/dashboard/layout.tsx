@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/src/lib/supabase'
 import { Sidebar } from '@/components/dashboard/sidebar'
@@ -267,11 +267,22 @@ export default function DashboardLayout({
 }) {
   return (
     <UserProvider>
-      <PinProvider>
-        <NotificationProvider>
-          <DashboardContent>{children}</DashboardContent>
-        </NotificationProvider>
-      </PinProvider>
+      <NotificationProvider>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center bg-background">
+              <div
+                className="w-8 h-8 rounded-full border-2 animate-spin"
+                style={{ borderColor: '#c9a84c', borderTopColor: 'transparent' }}
+              />
+            </div>
+          }
+        >
+          <PinProvider>
+            <DashboardContent>{children}</DashboardContent>
+          </PinProvider>
+        </Suspense>
+      </NotificationProvider>
     </UserProvider>
   )
 }

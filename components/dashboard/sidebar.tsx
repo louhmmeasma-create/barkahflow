@@ -190,7 +190,7 @@ export function Sidebar() {
           {(isRole('admin') || can(PERMISSIONS.SETTINGS_ACCESS)) && (
             <div className="mt-4">
               {renderLink(
-                { label: 'Paramètres', href: '/dashboard/settings', icon: Settings },
+                { label: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
                 'settings'
               )}
             </div>

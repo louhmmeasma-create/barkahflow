@@ -43,7 +43,7 @@ type AuthState = "checking" | "needs-login";
 function getRedirectUrl(): string {
   const platform = Capacitor.getPlatform();
   if (platform === "android" || platform === "ios") {
-    return "barkahflow://auth-callback";
+    return "com.barkahflow.app://auth-callback";
   }
   return window.location.origin + "/dashboard";
 }
