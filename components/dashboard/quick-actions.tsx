@@ -48,29 +48,24 @@ export function QuickActions({ onInvoiceClick }: QuickActionsProps) {
   ]
 
   const handleClick = (action: typeof actions[0]) => {
-    // 🔥 Action spéciale pour la facture - redirection sans message
     if (action.key === 'invoice' && onInvoiceClick) {
       onInvoiceClick()
       return
     }
-    
-    // Navigation par défaut pour les autres actions
     router.push(action.href)
   }
 
   return (
     <div className="rounded-2xl bg-[#faf9f6] dark:bg-zinc-900 border border-[#EAECEF] dark:border-zinc-800 shadow-sm px-6 py-5">
       <div className="flex flex-col md:flex-row items-center gap-6">
-        {/* Illustration */}
         <div className="shrink-0">
           <img
-            src="/slides/analytics-person.png"
+            src="/slides/analytics-person.svg"
             alt={t('dashboard.quick_actions.image_alt', 'Analytics illustration')}
             className="w-[130px] h-auto object-contain pointer-events-none select-none"
           />
         </div>
 
-        {/* Titre + description */}
         <div className="flex-1 min-w-0">
           <p className="text-base font-bold text-gray-900 dark:text-white">
             {t('dashboard.quick_actions.promo_title', 'Gérez votre activité facilement')}
@@ -83,7 +78,6 @@ export function QuickActions({ onInvoiceClick }: QuickActionsProps) {
           </p>
         </div>
 
-        {/* Grille 2x2 de boutons */}
         <div className="grid grid-cols-2 gap-3 shrink-0">
           {actions.map((action) => {
             const Icon = action.icon
