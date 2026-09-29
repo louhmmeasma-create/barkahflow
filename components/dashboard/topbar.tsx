@@ -284,20 +284,6 @@ export function TopBar({ user }: TopBarProps) {
         {/* ─── Notifications ─────────────────────────────────────────── */}
         {canUseNotifications && <Notifications />}
 
-        {/* ─── Assistant IA ──────────────────────────────────────────── */}
-        {canUseAI && <VoiceAssistantButton />}
-
-        <LanguageDropdown />
-
-        {mounted && (
-          <button
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 transition-colors"
-          >
-            {isDark ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
-        )}
-
         {/* Bouton verrouillage manuel — visible pour admin ET caissier */}
         <button
           onClick={() => lockApp()}

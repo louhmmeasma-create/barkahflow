@@ -60,7 +60,6 @@ export const PERMISSIONS = {
   INVOICES_EDIT: 'invoices_edit',
   INVOICES_DELETE: 'invoices_delete',
   INVOICES_EXPORT: 'invoices_export',
-  // INVOICES_PRINT: 'invoices_print', // RETIRÉ
 
   // Finances (4 pages séparées : revenus, dépenses, dettes, rapports)
   FINANCE_REVENUE: 'finance_revenue',
@@ -73,8 +72,7 @@ export const PERMISSIONS = {
   SETTINGS_COMPANY: 'settings_company',
   SETTINGS_USERS: 'settings_users',
 
-  // ─── NOUVEAUX : IA et Notifications ──────────────────────────────
-  AI_ASSISTANT: 'ai_assistant',
+  // ─── Notifications ───────────────────────────────────────────────
   NOTIFICATIONS: 'notifications',
 } as const
 
@@ -194,13 +192,12 @@ export const PERMISSION_MODULES: PermissionModule[] = [
       { key: PERMISSIONS.SETTINGS_USERS, labelFr: 'Gestion des utilisateurs' },
     ],
   },
-  // ─── NOUVEAU MODULE : IA et Notifications ──────────────────────────────
+  // ─── MODULE : Notifications ──────────────────────────────────────────────
   {
     key: 'features',
     labelFr: 'Fonctionnalités',
-    access: PERMISSIONS.AI_ASSISTANT, // placeholder
+    access: PERMISSIONS.NOTIFICATIONS, // placeholder
     actions: [
-      { key: PERMISSIONS.AI_ASSISTANT, labelFr: 'Assistant IA' },
       { key: PERMISSIONS.NOTIFICATIONS, labelFr: 'Notifications' },
     ],
   },
@@ -265,6 +262,9 @@ export function hasFinanceGroupAccess(
  */
 export function normalizePermissions(selected: Permission[]): Permission[] {
   const set = new Set(selected)
+
+  // ─── Nettoyage des anciennes permissions supprimées ──────────────
+  set.delete('ai_assistant' as Permission)
 
   for (const mod of PERMISSION_MODULES) {
     if (mod.key === 'finance') continue // finance has no single access gate

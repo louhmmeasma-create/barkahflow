@@ -646,15 +646,15 @@
       "tooltip": {
         "income": "Revenu total :",
         "expenses": "Dépenses :",
-        "net": "Chiffre d\\"
+        "net": "Chiffre d'affaires net :"
       },
-      "title": "Chiffre d",
+      "title": "Chiffre d'affaires net",
       "period": {
         "7d": "7 jours",
         "30d": "30 jours"
       },
       "summary": {
-        "net": "Chiffre d\\",
+        "net": "Chiffre d'affaires net",
         "income": "Revenu total",
         "expenses": "Total des dépenses"
       }
@@ -672,7 +672,7 @@
       "delete": "Êtes-vous sûr de vouloir supprimer cette dépense ?"
     },
     "title": "Dépenses",
-    "subtitle": "Gérez les coûts opérationnels, les factures et les sorties de trésorerie de l\\",
+    "subtitle": "Gérez les coûts opérationnels, les factures et les sorties de trésorerie de l'entreprise",
     "export": "Exporter",
     "add": "Ajouter une dépense",
     "filter": {
@@ -772,8 +772,8 @@
     "business": {
       "sales_revenue": "Revenu de vente",
       "debt_settlement": "Règlement de dette",
-      "title": "Rapports d\\",
-      "subtitle": "Analysez les marges bénéficiaires brutes, les coûts d\\",
+      "title": "Rapports d'activité",
+      "subtitle": "Analysez les marges bénéficiaires brutes, les coûts d'exploitation et le grand livre des flux de trésorerie",
       "profit_margin": "Marge bénéficiaire brute",
       "total_expenses": "Total des dépenses",
       "exp_count": "Sur {{count}} opérations de dépenses",
@@ -797,7 +797,7 @@
       "debt_bal": "Dette restante"
     },
     "inventory": {
-      "title": "Rapports d",
+      "title": "Rapports d'inventaire",
       "subtitle": "Évaluez les articles en stock, suivez les niveaux faibles et gérez les limites de réapprovisionnement",
       "total_val": "Valeur totale du stock",
       "sku_count": "Sur {{count}} références de produits",
@@ -806,13 +806,13 @@
       "stock_levels_title": "Statut des niveaux de stock",
       "product": "Produit",
       "current_stock": "Stock actuel",
-      "threshold": "Seuil d",
+      "threshold": "Seuil d'alerte",
       "value": "Valeur (Coût)"
     },
     "categories": {
       "sales": "Rapports de ventes",
-      "inventory": "Rapports d\\",
-      "business": "Rapports d\\",
+      "inventory": "Rapports d'inventaire",
+      "business": "Rapports d'activité",
       "tax": "Rapports de taxes & factures",
       "customers": "Rapports clients",
       "revenue": "Rapports de revenus"
@@ -821,7 +821,7 @@
       "sales": "Suivez les revenus, la valeur moyenne des commandes et la performance des produits.",
       "inventory": "Surveillez les niveaux de stock, la valeur des marchandises et les alertes de réapprovisionnement.",
       "business": "Aperçu des marges bénéficiaires, des dépenses et du grand livre des flux de trésorerie.",
-      "tax": "Exportez les résumés des taxes collectées et l\\",
+      "tax": "Exportez les résumés des taxes collectées et l'historique de facturation des clients.",
       "customers": "Analysez les niveaux de crédit des clients, les dettes impayées et les meilleurs clients.",
       "revenue": "Consultez les rapports sur les ventes régulières et les revenus des événements externes."
     },
@@ -829,7 +829,7 @@
       "popular": "Populaire"
     },
     "title": "Rapports",
-    "subtitle": "Accédez aux résumés, statistiques de vente et indicateurs d\\",
+    "subtitle": "Accédez aux résumés, statistiques de vente et indicateurs d'activité de la boutique",
     "view": "Voir le rapport",
     "revenue": {
       "title": "Rapports de revenus",
@@ -854,7 +854,7 @@
     },
     "sales": {
       "title": "Rapports de ventes",
-      "subtitle": "Suivez les chiffres d\\",
+      "subtitle": "Suivez les chiffres d'affaires, les commandes et les ventes de produits individuellement",
       "total_revenue": "Revenu total",
       "aov": "Valeur moyenne des commandes",
       "based_on_orders": "Basé sur {{count}} commandes",
@@ -866,7 +866,7 @@
     },
     "tax": {
       "title": "Rapports de taxes & factures",
-      "subtitle": "Examinez les taxes sur les ventes accumulées, les soldes impayés et l\\",
+      "subtitle": "Examinez les taxes sur les ventes accumulées, les soldes impayés et l'historique des factures",
       "total_collected": "Total des taxes collectées",
       "fiscal_year": "Taxes calculées sur toutes les factures",
       "outstanding": "Factures en attente",
@@ -896,10 +896,10 @@
   "voice": {
     "toggle_assistant": "Assistant vocal",
     "no_input": "Veuillez saisir une commande.",
-    "not_understood": "Désolé, je n",
-    "no_pending_confirmation": "Je n\\",
+    "not_understood": "Désolé, je n'ai pas compris votre commande.",
+    "no_pending_confirmation": "Je n'ai aucune confirmation en attente.",
     "action_cancelled": "Action annulée.",
-    "nothing_to_repeat": "Je n\\",
+    "nothing_to_repeat": "Je n'ai rien à répéter.",
     "confirm_default": "Voulez-vous confirmer cette action ?",
     "type_command": "Tapez votre commande..."
   },
